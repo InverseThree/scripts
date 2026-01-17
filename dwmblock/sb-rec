@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+[[ -f /tmp/recordingicon ]] || echo "  " > /tmp/recordingicon
+[[ -f /tmp/micicon ]] || echo " " > /tmp/micicon
+echo "$(cat /tmp/recordingicon) Rec $(cat /tmp/micicon) Mic"
+
+case $BLOCK_BUTTON in
+    # 1) recording ;;
+    # 2) autorecord ;;
+    # 3) recordingMic ;;
+    6) setsid -f "$TERMINAL" -e "sudoedit" "$0" ;;
+esac

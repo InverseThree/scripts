@@ -1,0 +1,11 @@
+#!/bin/bash
+
+current_time="`date +%H:%M:%S`";
+current_date="`date +%d/%b/%Y`";
+current_weekday="`date +%a`";
+echo " ""$current_date, $current_weekday" "" "$current_time"
+
+case $BLOCK_BUTTON in
+	3) setsid -w -f "$TERMINAL" -e khal interactive ;;
+	6) setsid -f "$TERMINAL" -e "sudoedit" "$0" ;;
+esac

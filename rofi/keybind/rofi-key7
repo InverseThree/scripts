@@ -1,0 +1,11 @@
+#!/usr/bin/bash
+
+MODE="/tmp/rofi-mode"
+KILLED="/tmp/rofi-killed"
+SWITCHED="/tmp/rofi-switched"
+
+/dev/null > "$MODE"
+/dev/null > "$KILLED"
+/dev/null > "$SWITCHED"
+
+killall rofi

@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+rolling_text() {
+    text=$1
+    max_length=$2
+    text_length=${#text}
+    if [[ $text_length -ge $max_length ]]; then
+        time=$(awk '{print int($1) + 1000}' /proc/uptime)
+        time=$((time % max_length))
+        text="${text} » ${text}"
+        text=${text:time}
+        text=${text::max_length}
+        echo "$text"
+    else
+        echo "$text"
+    fi
+}
+
+BROWSER=firefox
+VIDEO=vlc
+MUSIC=mpd
+
+BROWSER_STATUS=$(2>/dev/null playerctl --player=$BROWSER status) && STATUS=$BROWSER_STATUS
+[[ $STATUS == "Stopped" || -z $STATUS ]] && VIDEO_STATUS=$(2>/dev/null playerctl --player=$VIDEO status) && STATUS=$VIDEO_STATUS
+[[ $STATUS == "Stopped" || -z $STATUS ]] && MUSIC_STATUS=$(2>/dev/null playerctl --player=$MUSIC status) && STATUS=$MUSIC_STATUS
+
+[[ $STATUS == "Playing" ]] && ICON=" " || ICON=" "
+
+if [[ $BROWSER_STATUS == "Playing" || $BROWSER_STATUS == "Paused" ]]; then
+    NAME=librewolf
+    PLAYER=$BROWSER
+    NORMAL=$(playerctl metadata --player=$PLAYER --format '{{ trunc(title,1000) }}')
+    ALTERNATE=$(playerctl metadata --player=$PLAYER --format '{{ trunc(artist,1000) }} - {{ trunc(title,1000) }}')
+elif [[ $VIDEO_STATUS == "Playing" || $VIDEO_STATUS == "Paused" ]]; then
+    NAME=vlc
+    PLAYER=$VIDEO
+    FILE=$(playerctl metadata --player=$PLAYER --format '{{ trunc(xesam:url,1000) }}')
+    TRIM=${FILE%.*}
+    TITLE=${TRIM//\%20/ }
+    NORMAL=${TITLE##*/}
+    ALTERNATE=${TITLE##*/}
+elif [[ $MUSIC_STATUS == "Playing" || $MUSIC_STATUS == "Paused" ]]; then
+    NAME=alacritty
+    PLAYER=$MUSIC
+    [[ $MUSIC_STATUS == "Playing" ]] && ICON="󰝚 " || ICON=" "
+    NORMAL=$(playerctl metadata --player=$PLAYER --format '{{ trunc(artist,1000) }} - {{ trunc(title,1000) }}')
+    ALTERNATE=$(playerctl metadata --player=$PLAYER --format '{{ trunc(album,1000) }} - {{ trunc(title,1000) }}')
+elif [[ ( $(playerctl -a status) == *"Stopped"* && $(playerctl -a status) != *"Paused"* ) || $(playerctl -a status) == "No players found" ]]; then
+    ICON=" "
+fi
+
+PLAYER_CHANGED="/tmp/dwmblocks_player_changed"
+CURRENT_PLAYER="/tmp/dwmblocks_player"
+
+[[ $PLAYER != $(cat $CURRENT_PLAYER) ]] && echo "yes" > "$PLAYER_CHANGED" || echo "no" > "$PLAYER_CHANGED" 
+
+[[ -n $PLAYER ]] && echo $PLAYER > "$CURRENT_PLAYER"
+
+FORMAT_FILE="/tmp/dwmblocks_mus_format"
+[ ! -f "$FORMAT_FILE" ] && echo "0" > "$FORMAT_FILE"
+
+read FORMAT < "$FORMAT_FILE"
+
+[ "$FORMAT" -eq 0 ] && INFO="$NORMAL" || INFO="$ALTERNATE"
+
+MUSIC_INFO="/tmp/dwmblocks_music_info"
+
+if [[ $STATUS == "Playing" ]]; then
+    echo $(rolling_text "$INFO" "30") > "$MUSIC_INFO"
+    echo -e "$ICON$(cat $MUSIC_INFO)"
+elif [[ $STATUS == "Paused" ]]; then
+    [[ $(cat $PLAYER_CHANGED) == "yes" ]] && echo $(rolling_text "$INFO" "30") > "$MUSIC_INFO"
+    echo -e "$ICON$(cat $MUSIC_INFO)"
+else
+    echo -e "$ICON  -   "
+fi
+
+case $BLOCK_BUTTON in
+    1) echo "$(( ($FORMAT + 1) % 2 ))" > "$FORMAT_FILE" ;;
+    2) playerctl --player=$PLAYER play-pause ;;
+    3) wmctrl -a $NAME ;;
+    4) playerctl --player=$PLAYER volume 0.10+ ;;
+    5) playerctl --player=$PLAYER volume 0.10- ;;
+    6) setsid -f "$TERMINAL" -e "sudoedit" "$0" ;;
+esac

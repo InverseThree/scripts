@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+start() {
+  [[ -f /tmp/recpid ]] && exit 1
+  echo $$ > /tmp/autorecpid
+  echo "  " > /tmp/recordingicon && pkill -RTMIN+1 dwmblocks
+
+  killall xidlehook
+
+  while true; do
+    xidlehook --when-audio --once --timer 3 'nohup recording&' ''
+    xidlehook --not-when-audio --once --timer 60 'nohup recording&' ''
+  done
+}
+
+end() {
+  kill -15 "$(cat /tmp/autorecpid)"
+  rm -f /tmp/autorecpid
+  [[ ! -f /tmp/recpid ]] && (echo "  " > /tmp/recordingicon && pkill -RTMIN+1 dwmblocks) || nohup recording&  
+  killall xidlehook
+
+  xidlehook --not-when-audio --timer 570 'rofi-lockscreen' '' &
+}
+
+([[ -f /tmp/autorecpid ]] && end && exit 0) || start

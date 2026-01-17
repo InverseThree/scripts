@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+# Sensor info
+echo "Available sensors:" > /tmp/dwmblocks_debug.log
+sensors >> /tmp/dwmblocks_debug.log
+echo "---" >> /tmp/dwmblocks_debug.log
+
+CPU_TEMP=$(sensors | awk '
+    /^Tdie|^Package id|^Core 0|^CPU|^temp1/ {
+        gsub(/[+°C]/, "");
+        for (i=1; i<=NF; i++) {
+            if ($i ~ /^[0-9]+(\.[0-9]+)?$/) {
+		gsub(/\..*/, "", $i);
+                print $i;
+                exit;
+            }
+        }
+    }')
+
+# Debug CPU temperature detection, if not found, return N/A
+if [ -z "$CPU_TEMP" ]; then
+    # Try simpler pattern as fallback
+    CPU_TEMP=$(sensors | grep -E '^(Core 0|Package id 0|CPU)' | awk '{print $3}' | tr -d '+°C' | head -n1)
+fi
+
+[ -z "$CPU_TEMP" ] && CPU_TEMP="N/A"
+echo "CPU_TEMP=$CPU_TEMP" >> /tmp/dwmblocks_debug.log
+
+# Memory and CPU usage
+MEM_USE=$(free -m | awk '/^Mem/ {printf "%.1f", ($3)/1024}')
+# CPU_USE=$(iostat -c | awk '/avg-cpu:/{getline; print "User CPU: "$1"%\n\nSystem CPU: "$3"%"}')
+
+# Send to bar
+echo " "$CPU_TEMP"℃" " "$MEM_USE"󰊭"
+
+
+# Clicking on bar
+case $BLOCK_BUTTON in
+		1) setsid -w -f "$TERMINAL" -e htop ;;
+		3) setsid -w -f "$TERMINAL" -e top "-o" "%MEM" ;;
+		6) setsid -f "$TERMINAL" -e "sudoedit" "$0" ;;
+esac

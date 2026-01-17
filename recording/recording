@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+record() {
+  [[ -f /tmp/winpid ]] && exit 1
+
+  ffmpeg -s "$(xdpyinfo | awk '/dimensions/{print $2}')" -f x11grab -r 60 -i :0.0 -f pulse -i alsa_output.pci-0000_00_1b.0.analog-stereo.monitor -ac 2 -c:v h264 -crf 17 "$HOME/Videos/recording_$(date '+%a__%b%d__%H_%M_%S').mkv" &
+  echo $! > /tmp/recpid
+
+  ([[ -f /tmp/autorecpid ]] && echo " 󰑊 " > /tmp/recordingicon || echo "  " > /tmp/recordingicon) && pkill -RTMIN+1 dwmblocks
+
+  notify-send -t 1000 -h string:bgcolor:#a3be8c "Recording started" && sleep 1
+  killall dunst
+}
+
+end() {
+  kill -15 "$(cat /tmp/recpid)"
+  rm -f /tmp/recpid
+
+  ([[ -f /tmp/autorecpid ]] && echo "  " > /tmp/recordingicon || echo "  " > /tmp/recordingicon) && pkill -RTMIN+1 dwmblocks
+
+  dunst &
+  notify-send -t 1000 -h string:bgcolor:#bf616a "Recording ended"
+}
+
+([[ -f /tmp/recpid ]] && end && exit 0) || record

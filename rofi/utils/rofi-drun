@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+MODE="/tmp/rofi-mode"
+KILLED="/tmp/rofi-killed"
+SWITCHED="/tmp/rofi-switched"
+
+/dev/null > "$MODE"
+/dev/null > "$KILLED"
+/dev/null > "$SWITCHED"
+
+rofi -show drun -show-emojis

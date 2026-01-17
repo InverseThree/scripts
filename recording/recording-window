@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+record() {
+  [[ -f /tmp/autorecpid || -f /tmp/recpid ]] && exit 1
+
+  query=$(xwininfo -id $(xdotool getactivewindow) | grep "Window id")
+  info=${query%% \"*}
+  id=${info##*: }
+  echo $id > /tmp/winid1
+
+  gst-launch-1.0 ximagesrc xid=$id ! video/x-raw,framerate=60/1 ! videoconvert ! x264enc ! matroskamux name=mux ! filesink location=$HOME/Videos/tmp/recording_$(date '+%a__%b%d__%H_%M_%S').mkv pulsesrc device="alsa_output.pci-0000_00_1b.0.analog-stereo.monitor" buffer-time=20000000 ! "audio/x-raw,channels=2,rate=48000" ! audioconvert ! vorbisenc ! mux. -e &
+
+  echo $! > /tmp/winpid
+
+  echo "  " > /tmp/recordingicon && pkill -RTMIN+1 dwmblocks
+
+  notify-send -t 1000 -h string:bgcolor:#a3be8c "Recording current window"
+}
+
+end() {
+  kill -15 "$(cat /tmp/winpid)"
+  rm -f /tmp/winpid
+
+  query=$(xwininfo -id $(xdotool getactivewindow) | grep "Window id")
+  info=${query%% \"*}
+  id=${info##*: }
+  echo $id > /tmp/winid2
+
+  if [[ $(cat /tmp/winid1) == $(cat /tmp/winid2) ]]; then
+    rm -f /tmp/winid1 && rm -f /tmp/winid2
+    echo "  " > /tmp/recordingicon && pkill -RTMIN+1 dwmblocks
+
+    notify-send -t 3000 -h string:bgcolor:#D29654 "Merging videos"
+
+    for filename in $HOME/Videos/tmp/*.mkv; do
+      echo "file $filename" >> concat-list
+    done
+    ffmpeg -f concat -safe 0 -i concat-list $HOME/Videos/recording_$(date '+%a__%b%d__%H_%M_%S').mkv
+    rm -rf $HOME/Videos/tmp/*
+    rm -f concat-list
+
+    notify-send -t 1000 -h string:bgcolor:#bf616a "Merging ended"
+  else
+    record &
+  fi
+}
+
+([[ -f /tmp/winpid ]] && end && exit 0) || record

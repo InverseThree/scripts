@@ -1,0 +1,3 @@
+#!/bin/bash
+
+recording-window & recording-audio

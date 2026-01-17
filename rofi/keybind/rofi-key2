@@ -1,0 +1,43 @@
+#!usr/bin/bash
+
+MODE="/tmp/rofi-mode"
+KILLED="/tmp/rofi-killed"
+SWITCHED="/tmp/rofi-switched"
+
+[[ -z $(cat $KILLED) ]] && echo "true" > "$KILLED"
+[[ -z $(cat $SWITCHED) ]] && echo "false" > "$SWITCHED"
+[[ -z $(cat $MODE) ]] && echo 0 > "$MODE"
+[[ $(cat $KILLED) == "true" ]] && echo 0 > "$MODE"
+echo "false" > "$KILLED"
+
+theme='omori2';
+
+if [[ $(cat $SWITCHED) == "false" ]]; then
+    echo "true" > "$SWITCHED";
+    killall rofi;
+
+    if [[ $(cat $MODE) == "0" ]]; then
+        ## Run
+        rofi \
+            -show window -show-emojis NULL \
+            -theme ${dir}/${theme}.rasi &
+    elif [[ $(cat $MODE) == "1" ]]; then
+        ## Run
+        rofi \
+            -show drun -show-emojis NULL \
+            -theme ${dir}/${theme}.rasi &
+    elif [[ $(cat $MODE) == "2" ]]; then
+        ## Run
+        rofi \
+            -show run -show-emojis NULL \
+            -theme ${dir}/${theme}.rasi &
+    fi
+fi
+
+if [[ $(cat $MODE) == "0" ]]; then
+    echo 2 > "$MODE";
+elif [[ $(cat $MODE) == "1" ]]; then
+    echo 0 > "$MODE";
+elif [[ $(cat $MODE) == "2" ]]; then
+    echo 1 > "$MODE";
+fi

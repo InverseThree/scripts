@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+audend() {
+    kill -15 "$(cat /tmp/audpid)"
+    rm -f /tmp/audpid
+
+    echo " " > /tmp/micicon && pkill -RTMIN+1 dwmblocks
+
+    killall dunst
+    dunst &
+    notify-send -t 1000 -h string:bgcolor:#bf616a "Mic muted"
+}
+
+recend() {
+    kill -15 "$(cat /tmp/recpid)"
+    rm -f /tmp/recpid
+
+    echo "  " > /tmp/recordingicon && pkill -RTMIN+1 dwmblocks
+
+    notify-send -t 1000 -h string:bgcolor:#bf616a "Recording ended"
+}
+
+winend() {
+    kill -15 "$(cat /tmp/winpid)"
+    rm -f /tmp/winpid
+    rm -f /tmp/winid1 && rm -f /tmp/winid2
+    echo "  " > /tmp/recordingicon && pkill -RTMIN+1 dwmblocks
+
+    notify-send -t 3000 -h string:bgcolor:#D29654 "Merging videos"
+
+    for filename in $HOME/Videos/tmp/*.mkv; do
+        echo "file $filename" >> concat-list
+    done
+    ffmpeg -f concat -safe 0 -i concat-list $HOME/Videos/recording_$(date '+%a__%b%d__%H_%M_%S').mkv
+    rm -rf $HOME/Videos/tmp/*
+    rm -f concat-list
+
+    notify-send -t 1000 -h string:bgcolor:#bf616a "Merging ended"
+}
+
+[[ -f /tmp/audpid && (-f /tmp/recpid || -f /tmp/winpid) ]] || exit 1
+
+audend
+[[ -f /tmp/recpid ]] && recend || winend
+
+sleep 1
+
+video=$HOME/Videos/$(ls $HOME/Videos -Art -p | grep -v / | tail -n 1)
+audio=$HOME/Videos/audio/$(ls $HOME/Videos/audio -Art -p | grep -v / | tail -n 1)
+
+notify-send -t 3000 -h string:bgcolor:#D29654 "Merging video and audio"
+
+ffmpeg -i $video -i $audio -map 0 -map 1:a -c:v copy $HOME/Videos/recording_$(date '+%a__%b%d__%H_%M_%S').mkv
+finalvideo=$HOME/Videos/$(ls $HOME/Videos -Art -p | grep -v / | tail -n 1)
+ffmpeg -i $finalvideo -filter_complex "[0:a:0][0:a:1]amix=2:longest[aout]" -map 0:V:0 -map "[aout]" -c:v copy -c:a aac -b:a 320k -y $HOME/Videos/recording_$(date '+%a__%b%d__%H_%M_%S').mkv
+rm -f $video && rm -f $audio && rm -f $finalvideo
+
+notify-send -t 1000 -h string:bgcolor:#bf616a "Merging ended"
+
