@@ -1,5 +1,5 @@
 #!/usr/bin/bash
 
-rofi-betterlockscreen &
+rofi-lockscreen &
 sleep 0.5 &&
 systemctl suspend
