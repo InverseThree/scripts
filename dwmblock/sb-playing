@@ -40,7 +40,7 @@ elif [[ $VIDEO_STATUS == "Playing" || $VIDEO_STATUS == "Paused" ]]; then
     NORMAL=${TITLE##*/}
     ALTERNATE=${TITLE##*/}
 elif [[ $MUSIC_STATUS == "Playing" || $MUSIC_STATUS == "Paused" ]]; then
-    NAME=alacritty
+    NAME=kitty
     PLAYER=$MUSIC
     [[ $MUSIC_STATUS == "Playing" ]] && ICON="󰝚 " || ICON=" "
     NORMAL=$(playerctl metadata --player=$PLAYER --format '{{ trunc(artist,1000) }} - {{ trunc(title,1000) }}')

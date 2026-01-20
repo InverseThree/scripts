@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+background() {
+  [[ -f /tmp/tbpid ]] && exit 1
+
+  killall thunderbird
+
+  thunderbird --headless &
+  echo $! > /tmp/tbpid
+}
+
+foreground() {
+  kill -15 "$(cat /tmp/tbpid)"
+  rm -f /tmp/tbpid
+
+  thunderbird
+
+  trap "background" EXIT
+}
+
+([[ -f /tmp/tbpid ]] && foreground && exit 0) || background
