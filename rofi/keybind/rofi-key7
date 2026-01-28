@@ -8,4 +8,5 @@ SWITCHED="/tmp/rofi-switched"
 /dev/null > "$KILLED"
 /dev/null > "$SWITCHED"
 
+clip &
 killall rofi

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+fullClip=$(greenclip print)
+clip=${fullClip%%$'\n'*}
+clip=$(echo ${clip//\\/\\\\\\\\} | sed 's/ /\n/g')
+
+[[ $clip =~ image/.*\  ]] && exit 1
+
+echo $clip | xsel -b --trim
