@@ -1,0 +1,48 @@
+#!/bin/bash
+
+MODE="/tmp/rofi-mode"
+SWITCHED="/tmp/rofi-switched"
+DIRECTION="/tmp/rofi-direction"
+
+theme='omori1'
+
+if [[ $(cat $SWITCHED) == "true" ]]; then
+    echo "false" > "$SWITCHED"
+
+    pkill -f "xsel"
+
+    xdotool key alt+8
+
+    killall rofi
+
+    newClip=$(xsel)
+
+    if [[ $(cat $MODE) == "0" ]]; then
+        ## Run
+        rofi \
+            -show drun -show-emojis NULL \
+            -theme ${dir}/${theme}.rasi &
+    elif [[ $(cat $MODE) == "1" ]]; then
+        ## Run
+        rofi \
+            -show run -show-emojis NULL \
+            -theme ${dir}/${theme}.rasi &
+    elif [[ $(cat $MODE) == "2" ]]; then
+        ## Run
+        rofi \
+            -show window -show-emojis NULL \
+            -theme ${dir}/${theme}.rasi &
+    fi
+
+    sleep 0.1
+
+    case $(cat $DIRECTION) in
+        right) xdotool key ctrl+f ;;
+        left) xdotool key ctrl+b ;;
+        up) xdotool key ctrl+p ;;
+        down) xdotool key ctrl+n ;;
+    esac
+
+    [[ -n "$newClip" ]] && echo $newClip | xsel -b && xdotool key ctrl+v && clip
+fi
+

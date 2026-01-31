@@ -1,6 +1,6 @@
 #!/bin/sh
 
-fullClip=$(greenclip print)
+fullClip=$(greenclip print | tr -d '\0')
 clip=${fullClip%%$'\n'*}
 clip=$(echo ${clip//\\/\\\\\\\\} | sed 's/ /\n/g')
 

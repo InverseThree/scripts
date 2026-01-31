@@ -1,5 +1,3 @@
 #!/bin/sh
 
 zsh ~/scripts/general/getClip &
-sleep 1
-kill -15 $!
