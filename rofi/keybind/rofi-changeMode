@@ -45,4 +45,3 @@ if [[ $(cat $SWITCHED) == "true" ]]; then
 
     [[ -n "$newClip" ]] && echo $newClip | xsel -b && xdotool key ctrl+v && clip
 fi
-
