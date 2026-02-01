@@ -11,28 +11,28 @@ if [[ $(cat $SWITCHED) == "true" ]]; then
 
     pkill -f "xsel"
 
-    xdotool key alt+8
+    xdotool key alt+8 && killall rofi && newClip=$(xsel)
 
-    killall rofi
-
-    newClip=$(xsel)
-
-    if [[ $(cat $MODE) == "0" ]]; then
-        ## Run
-        rofi \
-            -show drun -show-emojis NULL \
-            -theme ${dir}/${theme}.rasi &
-    elif [[ $(cat $MODE) == "1" ]]; then
-        ## Run
-        rofi \
-            -show run -show-emojis NULL \
-            -theme ${dir}/${theme}.rasi &
-    elif [[ $(cat $MODE) == "2" ]]; then
-        ## Run
-        rofi \
-            -show window -show-emojis NULL \
-            -theme ${dir}/${theme}.rasi &
-    fi
+    case $(cat $MODE) in
+        0)
+            ## Run
+            rofi \
+                -show drun -show-emojis NULL \
+                -theme ${dir}/${theme}.rasi &
+            ;;
+        1)
+            ## Run
+            rofi \
+                -show run -show-emojis NULL \
+                -theme ${dir}/${theme}.rasi &
+            ;;
+        2)
+            ## Run
+            rofi \
+                -show window -show-emojis NULL \
+                -theme ${dir}/${theme}.rasi &
+            ;;
+    esac
 
     sleep 0.1
 

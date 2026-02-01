@@ -65,15 +65,17 @@ read FORMAT < "$FORMAT_FILE"
 
 MUSIC_INFO="/tmp/dwmblocks_music_info"
 
-if [[ $STATUS == "Playing" ]]; then
-    echo $(rolling_text "$INFO" "30") > "$MUSIC_INFO"
-    echo -e "$ICON$(cat $MUSIC_INFO)"
-elif [[ $STATUS == "Paused" ]]; then
-    [[ $(cat $PLAYER_CHANGED) == "yes" ]] && echo $(rolling_text "$INFO" "30") > "$MUSIC_INFO"
-    echo -e "$ICON$(cat $MUSIC_INFO)"
-else
-    echo -e "$ICON  -   "
-fi
+case $STATUS in
+    Playing)
+        echo $(rolling_text "$INFO" "30") > "$MUSIC_INFO"
+        echo -e "$ICON$(cat $MUSIC_INFO)"
+        ;;
+    Paused)
+        [[ $(cat $PLAYER_CHANGED) == "yes" ]] && echo $(rolling_text "$INFO" "30") > "$MUSIC_INFO"
+        echo -e "$ICON$(cat $MUSIC_INFO)"
+        ;;
+    *) echo -e "$ICON  -   " ;;
+esac
 
 case $BLOCK_BUTTON in
     1) echo "$(( ($FORMAT + 1) % 2 ))" > "$FORMAT_FILE" ;;

@@ -16,30 +16,32 @@ if [[ $(cat $SWITCHED) == "false" ]]; then
     echo "true" > "$SWITCHED"
     killall rofi
 
-    if [[ $(cat $MODE) == "0" ]]; then
-        ## Run
-        rofi \
-            -show run -show-emojis NULL \
-            -theme ${dir}/${theme}.rasi &
-    elif [[ $(cat $MODE) == "1" ]]; then
-        ## Run
-        rofi \
-            -show window -show-emojis NULL \
-            -theme ${dir}/${theme}.rasi &
-    elif [[ $(cat $MODE) == "2" ]]; then
-        ## Run
-        rofi \
-            -show drun -show-emojis NULL \
-            -theme ${dir}/${theme}.rasi &
-    fi
+    case $(cat $MODE) in
+        0)
+            ## Run
+            rofi \
+                -show run -show-emojis NULL \
+                -theme ${dir}/${theme}.rasi &
+            ;;
+        1)
+            ## Run
+            rofi \
+                -show window -show-emojis NULL \
+                -theme ${dir}/${theme}.rasi &
+            ;;
+        2)
+            ## Run
+            rofi \
+                -show drun -show-emojis NULL \
+                -theme ${dir}/${theme}.rasi &
+            ;;
+    esac
 fi
 
-if [[ $(cat $MODE) == "0" ]]; then
-    echo 1 > "$MODE"
-elif [[ $(cat $MODE) == "1" ]]; then
-    echo 2 > "$MODE"
-elif [[ $(cat $MODE) == "2" ]]; then
-    echo 0 > "$MODE"
-fi
+case $(cat $MODE) in
+    0) echo 1 > "$MODE" ;;
+    1) echo 2 > "$MODE" ;;
+    2) echo 0 > "$MODE" ;;
+esac
 
 trap "clip" EXIT
