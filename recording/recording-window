@@ -10,7 +10,7 @@ record() {
 
   pactl list short sources | grep "bluez" && input="bluez_output.EC:66:D1:CC:8F:2F.monitor" || input="alsa_output.pci-0000_00_1f.3.analog-stereo.monitor"
 
-  gst-launch-1.0 ximagesrc xid=$id ! video/x-raw,framerate=60/1 ! videoconvert ! x264enc ! matroskamux name=mux ! filesink location=$HOME/Videos/tmp/recording_$(date '+%a__%b%d__%H_%M_%S').mkv pulsesrc device=$input buffer-time=20000000 ! "audio/x-raw,channels=2,rate=48000" ! audioconvert ! vorbisenc ! mux. -e &
+  gst-launch-1.0 ximagesrc xid=$id ! video/x-raw,framerate=60/1 ! videoconvert ! vah264enc ! h264parse ! matroskamux name=mux ! filesink location=$HOME/Videos/tmp/recording_$(date '+%a__%b%d__%H_%M_%S').mkv pulsesrc device=$input buffer-time=20000000 ! "audio/x-raw,channels=2,rate=48000" ! audioconvert ! vorbisenc ! mux. -e &
 
   echo $! > /tmp/winpid
 

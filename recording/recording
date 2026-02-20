@@ -4,8 +4,9 @@ record() {
   [[ -f /tmp/winpid ]] && exit 1
 
   pactl list short sources | grep "bluez" && input="bluez_output.EC:66:D1:CC:8F:2F.monitor" || input="alsa_output.pci-0000_00_1f.3.analog-stereo.monitor"
-  ffmpeg -s "$(xdpyinfo | awk '/dimensions/{print $2}')" -f x11grab -r 60 -i :0.0 -f pulse -i $input -ac 2 -c:v h264 -crf 17 "$HOME/Videos/recording_$(date '+%a__%b%d__%H_%M_%S').mkv" &
-  echo $! > /tmp/recpid
+
+ffmpeg -init_hw_device vaapi=va:/dev/dri/renderD128 -filter_hw_device va -s "$(xdpyinfo | awk '/dimensions/{print $2}')" -f x11grab -r 60 -i :0.0 -f pulse -i $input -ac 2 -vf 'format=nv12,hwupload' -c:v h264_vaapi -crf 17 "$HOME/Videos/recording_$(date '+%a__%b%d__%H_%M_%S').mkv" &
+echo $! > /tmp/recpid
 
   ([[ -f /tmp/autorecpid ]] && echo " 󰑊 " > /tmp/recordingicon || echo "  " > /tmp/recordingicon) && pkill -RTMIN+1 dwmblocks
 
