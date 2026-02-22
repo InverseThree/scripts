@@ -3,15 +3,18 @@
 record() {
   [[ -f /tmp/winpid ]] && exit 1
 
-  pactl list short sources | grep "bluez" && input="bluez_output.EC:66:D1:CC:8F:2F.monitor" || input="alsa_output.pci-0000_00_1f.3.analog-stereo.monitor"
+  notify-send -t 1000 -h string:bgcolor:#a3be8c "Recording started" && sleep 0.5
+  killall dunst
 
-ffmpeg -init_hw_device vaapi=va:/dev/dri/renderD128 -filter_hw_device va -s "$(xdpyinfo | awk '/dimensions/{print $2}')" -f x11grab -r 60 -i :0.0 -f pulse -i $input -ac 2 -vf 'format=nv12,hwupload' -c:v h264_vaapi -crf 17 "$HOME/Videos/recording_$(date '+%a__%b%d__%H_%M_%S').mkv" &
-echo $! > /tmp/recpid
+  pactl list short sources | grep "bluez" && query=$(pactl list short sources | grep "bluez_output") || query=$(pactl list short sources | grep "alsa_output")
+
+  trim=${query#*	}
+  monitor=${trim%%	*} 
+
+  ffmpeg -init_hw_device vaapi=va:/dev/dri/renderD128 -filter_hw_device va -s "$(xdpyinfo | awk '/dimensions/{print $2}')" -f x11grab -r 60 -probesize 42M -i :0.0 -f pulse -i $monitor -ac 2 -vf 'format=nv12,hwupload' -c:v h264_vaapi -qp 15 -preset veryslow "$HOME/Videos/recording_$(date '+%a__%b%d__%H_%M_%S').mkv" &
+  echo $! > /tmp/recpid
 
   ([[ -f /tmp/autorecpid ]] && echo " 󰑊 " > /tmp/recordingicon || echo "  " > /tmp/recordingicon) && pkill -RTMIN+1 dwmblocks
-
-  notify-send -t 1000 -h string:bgcolor:#a3be8c "Recording started" && sleep 1
-  killall dunst
 }
 
 end() {
@@ -20,7 +23,7 @@ end() {
 
   ([[ -f /tmp/autorecpid ]] && echo "  " > /tmp/recordingicon || echo "  " > /tmp/recordingicon) && pkill -RTMIN+1 dwmblocks
 
-  dunst &
+  sleep 0.5 && dunst &
   notify-send -t 1000 -h string:bgcolor:#bf616a "Recording ended"
 }
 

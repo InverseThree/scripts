@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
 record() {
-  pactl list short sources | grep "bluez" && input="bluez_input.EC:66:D1:CC:8F:2F" || input="alsa_input.pci-0000_00_1f.3.analog-stereo"
+  pactl list short sources | grep "bluez" && query=$(pactl list short sources | grep "bluez_input") || query=$(pactl list short sources | grep "alsa_input")
 
-  ffmpeg -f pulse -i $input -af "afftdn=nf=-75" "$HOME/Videos/audio/audio_$(date '+%a__%b%d__%H_%M_%S').wav" &
+  trim=${query#*	}
+  monitor=${trim%%	*} 
+
+  ffmpeg -f pulse -i $monitor -af "afftdn=nf=-75" "$HOME/Videos/audio/audio_$(date '+%a__%b%d__%H_%M_%S').wav" &
   echo $! > /tmp/audpid
 
   echo " " > /tmp/micicon && pkill -RTMIN+1 dwmblocks
