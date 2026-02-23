@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 
+static="omori48ShadowsHotspotStatic"
+animated="omori48ShadowsHotspot"
+
 record() {
   [[ -f /tmp/winpid ]] && exit 1
 
   notify-send -t 1000 -h string:bgcolor:#a3be8c "Recording started" && sleep 0.5
   killall dunst
+
+  sed -i 's|Gtk/CursorThemeName.*|Gtk/CursorThemeName '\"$static\"'|' ~/.xsettingsd && killall -HUP xsettingsd
+  plasma-apply-cursortheme $static --size 48
 
   pactl list short sources | grep "bluez" && query=$(pactl list short sources | grep "bluez_output") || query=$(pactl list short sources | grep "alsa_output")
 
@@ -25,6 +31,9 @@ end() {
 
   sleep 0.5 && dunst &
   notify-send -t 1000 -h string:bgcolor:#bf616a "Recording ended"
+
+  sed -i 's|Gtk/CursorThemeName.*|Gtk/CursorThemeName '\"$animated\"'|' ~/.xsettingsd && killall -HUP xsettingsd
+  plasma-apply-cursortheme $animated --size 48
 }
 
 ([[ -f /tmp/recpid ]] && end && exit 0) || record

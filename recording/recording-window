@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 
+static="omori48ShadowsHotspotStatic"
+animated="omori48ShadowsHotspot"
+
 record() {
   [[ -f /tmp/autorecpid || -f /tmp/recpid ]] && exit 1
 
   notify-send -t 1000 -h string:bgcolor:#a3be8c "Recording current window"
+
+  sed -i 's|Gtk/CursorThemeName.*|Gtk/CursorThemeName '\"$static\"'|' ~/.xsettingsd && killall -HUP xsettingsd
+  plasma-apply-cursortheme $static --size 48
 
   query=$(xwininfo -id $(xdotool getactivewindow) | grep "Window id")
   info=${query%% \"*}
@@ -35,6 +41,9 @@ end() {
     echo "  " > /tmp/recordingicon && pkill -RTMIN+1 dwmblocks
 
     notify-send -t 3000 -h string:bgcolor:#D29654 "Merging videos"
+
+    sed -i 's|Gtk/CursorThemeName.*|Gtk/CursorThemeName '\"$animated\"'|' ~/.xsettingsd && killall -HUP xsettingsd
+    plasma-apply-cursortheme $animated --size 48
 
     for filename in $HOME/Videos/tmp/*.mkv; do
       echo "file $filename" >> concat-list
