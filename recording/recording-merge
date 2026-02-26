@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+animated="omori48ShadowsHotspot"
+
 audend() {
     kill -15 "$(cat /tmp/audpid)"
     rm -f /tmp/audpid
@@ -49,6 +51,9 @@ video=$HOME/Videos/$(ls $HOME/Videos -Art -p | grep -v / | tail -n 1)
 audio=$HOME/Videos/audio/$(ls $HOME/Videos/audio -Art -p | grep -v / | tail -n 1)
 
 notify-send -t 3000 -h string:bgcolor:#D29654 "Merging video and audio"
+
+sed -i 's|Gtk/CursorThemeName.*|Gtk/CursorThemeName '\"$animated\"'|' ~/.xsettingsd && killall -HUP xsettingsd
+plasma-apply-cursortheme $animated --size 48
 
 ffmpeg -i $video -i $audio -map 0 -map 1:a -c:v copy $HOME/Videos/recording_$(date '+%a__%b%d__%H_%M_%S').mkv
 finalvideo=$HOME/Videos/$(ls $HOME/Videos -Art -p | grep -v / | tail -n 1)
