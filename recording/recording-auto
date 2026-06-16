@@ -19,7 +19,7 @@ end() {
   [[ ! -f /tmp/recpid ]] && (echo "  " > /tmp/recordingicon && pkill -RTMIN+1 dwmblocks) || recording-display &  
   killall xidlehook
 
-  xidlehook --not-when-audio --timer 570 'rofi-lockscreen' '' &
+  xidlehook --not-when-audio --timer 870 'rofi-lockscreen' '' &
 }
 
 ([[ -f /tmp/autorecpid ]] && end && exit 0) || start
