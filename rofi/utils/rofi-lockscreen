@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+pidof -qx "betterlockscreen" && exit
+
 if !(pidof -qx "rofi"); then
     xidlehook --socket /tmp/socket --timer 0 'brightnessctl s 5%' 'brightnessctl s 15% && xidlehook-client --socket /tmp/socket control --timer 0 --action disable' &
     pid1=$!
