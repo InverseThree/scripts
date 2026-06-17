@@ -9,7 +9,7 @@ if !(pidof -qx "rofi"); then
     [[ -n $(xset -q | grep "Monitor is On") ]] && xset s off -dpms && exit
 fi
 
-xidlehook --timer 15 'xset dpms force off' '' --timer 1800 'systemctl suspend' '' &
+xidlehook --timer 15 'xset dpms force off' '' --timer 3585 'systemctl suspend' '' &
 pid2=$!
 
 trap "kill -9 $pid2; xset s off -dpms" EXIT
